@@ -36,8 +36,11 @@ struct ObserverStore: Dispatcher {
         switch result {
         case .auth(let credentials):
             closure = dismiss(from: controller?.presentingViewController, completion: { self.onAuth(credentials) })
-        case .error(let error):
-            closure = { self.onFailure(error) }
+        case .error(let error, let callback):
+            closure = {
+                self.onFailure(error)
+                callback()
+            }
         case .cancel:
             closure = dismiss(from: controller?.presentingViewController, completion: { self.onCancel() })
         case .signUp(let email, let attributes):
@@ -56,7 +59,7 @@ struct ObserverStore: Dispatcher {
 
 enum Result {
     case auth(Credentials)
-    case error(Error)
+    case error(Error, () -> ())
     case cancel
     case signUp(String, [String: Any])
     case forgotPassword(String)
